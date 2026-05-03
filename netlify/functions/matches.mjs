@@ -67,13 +67,14 @@ function parseDateTime(dateTimeStr) {
 
 function inferStatus(isoDatetime, isFinish, isLive) {
   if (isFinish) return "finished";
-  if (isLive)   return "live";
-  if (!isoDatetime) return "upcoming";
+  if (!isoDatetime) {
+    return isLive ? "live" : "upcoming";
+  }
   const now = Date.now();
   const matchMs = new Date(isoDatetime).getTime();
   const diffMin = (now - matchMs) / 60000;
-  if (diffMin >= 0 && diffMin < 105) return "live";
   if (diffMin < 0) return "upcoming";
+  if (diffMin < 105) return "live";
   return "finished";
 }
 
