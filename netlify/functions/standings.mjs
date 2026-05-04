@@ -6,10 +6,10 @@ const BASE_URL = "https://v1.handball.api-sports.io";
 
 // League IDs on API-Sports
 const LEAGUES = {
-  starligue: { id: 5, name: "Liqui Moly StarLigue", season: 2025 },
-  proligue:  { id: 6, name: "ProLigue", season: 2025 },
-  champions: { id: 1, name: "Ligue des Champions", season: 2025 },
-  european:  { id: 3, name: "European League", season: 2025 },
+  starligue: { id: 34,  name: "Liqui Moly StarLigue", season: 2025 },
+  proligue:  { id: 36,  name: "ProLigue", season: 2025 },
+  champions: { id: 131, name: "Ligue des Champions", season: 2025 },
+  european:  { id: 145, name: "European League", season: 2025 },
 };
 
 export default async (req) => {
