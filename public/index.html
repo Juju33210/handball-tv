@@ -162,9 +162,9 @@
     .star-badge { font-size: 0.6rem; font-family: var(--font-cond); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent2); }
     .team-home { display: flex; align-items: center; gap: 10px; }
     .team-away { display: flex; align-items: center; gap: 10px; flex-direction: row-reverse; }
-    .team-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
+    .team-logo { width: 42px; height: 42px; object-fit: contain; flex-shrink: 0; }
     .team-logo-placeholder {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 42px; height: 42px; border-radius: 50%;
       background: var(--bg); border: 1.5px solid var(--border);
       display: flex; align-items: center; justify-content: center;
       font-family: var(--font-cond); font-size: 0.65rem; font-weight: 700;
@@ -241,8 +241,9 @@
       .team-name { font-size: 0.95rem; }
       .score-display { font-size: 1.35rem; }
       .match-center { padding: 0 8px; min-width: 72px; }
-      .team-logo, .team-logo-placeholder { width: 30px; height: 30px; }
-      .filters { display: none; }
+      .team-logo, .team-logo-placeholder { width: 35px; height: 35px; }
+      .filters { display: flex; }
+      .filter-btn { font-size: 0.7rem; padding: 4px 8px; }
     }
   </style>
 </head>
@@ -452,13 +453,24 @@ function renderMatches() {
   const upcoming = filtered.filter(m => m.status === 'upcoming');
   const finished = filtered.filter(m => m.status === 'finished');
   let html = '';
-  if (live.length) { html += `<div class="section-header live-section"><span class="section-title">🔴 En direct (${live.length})</span><div class="section-line"></div></div>`; html += live.map(renderCard).join(''); }
+if (live.length) { html += `<div class="section-header live-section"><span class="section-title">🔴 En direct (${live.length})</span><div class="section-line"></div></div>`; html += live.map(renderCard).join(''); }
   if (upcoming.length) { html += `<div class="section-header upcoming-section"><span class="section-title">⏰ À venir (${upcoming.length})</span><div class="section-line"></div></div>`; html += upcoming.map(renderCard).join(''); }
-  if (finished.length) { html += `<div class="section-header"><span class="section-title">Terminés (${finished.length})</span><div class="section-line"></div></div>`; html += finished.map(renderCard).join(''); }
+  if (finished.length) {
+    html += `<div class="section-header"><span class="section-title">Terminés (${finished.length})</span><div class="section-line"></div><button onclick="toggleFinished()" id="toggleFinishedBtn" style="flex-shrink:0;padding:3px 10px;border-radius:20px;border:1.5px solid var(--border);font-family:var(--font-cond);font-size:0.7rem;font-weight:700;text-transform:uppercase;color:var(--text-dim);background:#fff;cursor:pointer">Voir</button></div>`;
+    html += `<div id="finishedList" style="display:none">${finished.map(renderCard).join('')}</div>`;
+  }
   container.innerHTML = html;
   state.matches.forEach(match => { window[`toggleNotif_${match.id}`] = () => toggleNotif(match); });
   renderStatusBar();
 }
+  window.toggleFinished = function() {
+  const list = document.getElementById('finishedList');
+  const btn = document.getElementById('toggleFinishedBtn');
+  if (!list) return;
+  const isHidden = list.style.display === 'none';
+  list.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Masquer' : 'Voir';
+};
 function renderStatusBar() {
   const all = state.matches;
   const liveCount = all.filter(m => m.status === 'live').length;
