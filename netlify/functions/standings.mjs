@@ -1,15 +1,10 @@
-// Netlify Function: GET /api/standings?league=LEAGUE_ID
-// Fetches standings from API-Sports handball
+const HIGHLIGHTLY_KEY = process.env.HIGHLIGHTLY_KEY;
 
-const API_KEY = process.env.API_SPORTS_KEY;
-const BASE_URL = "https://v1.handball.api-sports.io";
-
-// League IDs on API-Sports
 const LEAGUES = {
-  starligue: { id: 34,  name: "Liqui Moly StarLigue", season: 2025 },
-  proligue:  { id: 36,  name: "ProLigue", season: 2025 },
-  champions: { id: 131, name: "Ligue des Champions", season: 2025 },
-  european:  { id: 145, name: "European League", season: 2025 },
+  starligue: { id: 29718, name: "Liqui Moly StarLigue", season: 2025 },
+  proligue:  { id: 31420, name: "ProLigue",             season: 2025 },
+  champions: { id: 132,   name: "Ligue des Champions",  season: 2025 },
+  european:  { id: 145,   name: "European League",      season: 2025 },
 };
 
 export default async (req) => {
@@ -19,30 +14,16 @@ export default async (req) => {
 
   try {
     const res = await fetch(
-      `${BASE_URL}/standings?league=${league.id}&season=${league.season}`,
+      `https://handball.highlightly.net/standings?leagueId=${league.id}&season=${league.season}`,
       {
         headers: {
-          "x-apisports-key": API_KEY,
-          "x-rapidapi-host": "v1.handball.api-sports.io",
+          "x-rapidapi-key": HIGHLIGHTLY_KEY,
+          "x-rapidapi-host": "handball-highlights-api.p.rapidapi.com",
         },
       }
     );
     const data = await res.json();
-
-    // Extract standings array
-    const raw = data?.response?.[0]?.[0] || data?.response?.[0] || [];
-    const standings = (Array.isArray(raw) ? raw : []).map((team) => ({
-      rank: team.position,
-      name: team.team?.name,
-      logo: team.team?.logo,
-      played: team.games?.played,
-      won: team.games?.win?.total,
-      drawn: team.games?.draw?.total,
-      lost: team.games?.lose?.total,
-      goalsFor: team.goals?.for,
-      goalsAgainst: team.goals?.against,
-      points: team.points,
-    }));
+    const standings = data?.groups?.[0]?.standings || [];
 
     return new Response(
       JSON.stringify({ standings, league: league.name, updatedAt: new Date().toISOString() }),
