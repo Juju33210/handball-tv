@@ -1,6 +1,6 @@
 export default async (req) => {
-  const res = await fetch('https://handball.highlightly.net/leagues?countryCode=FR', {
-headers: {
+  const res = await fetch('https://handball.highlightly.net/standings?leagueId=29718&season=2025', {
+    headers: {
       'x-rapidapi-key': process.env.HIGHLIGHTLY_KEY,
       'x-rapidapi-host': 'handball-highlights-api.p.rapidapi.com'
     }
