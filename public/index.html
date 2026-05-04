@@ -393,9 +393,19 @@ function renderTeam(name, logo, side) {
     ? `<div class="team-home">${logoHtml}${placeholder}<span class="team-name">${name}</span></div>`
     : `<div class="team-away"><span class="team-name">${name}</span>${logoHtml}${placeholder}</div>`;
 }
+function getGameTime(isoDatetime) {
+  const elapsed = Math.floor((Date.now() - new Date(isoDatetime).getTime()) / 60000);
+  if (elapsed < 40) return `1MT ${elapsed}'`;
+  if (elapsed < 55) return `Mi-temps`;
+  if (elapsed < 95) return `2MT ${elapsed - 55}'`;
+  return null;
+}
+
 function renderCenter(match) {
   if ((match.status === 'finished' || match.status === 'live') && match.scoreHome !== null) {
-    return `<div class="match-center"><div class="score-display"><span>${match.scoreHome}</span><span class="score-separator">–</span><span>${match.scoreAway}</span></div></div>`;
+    const gameTime = match.status === 'live' && match.datetime ? getGameTime(match.datetime) : null;
+    const timeHtml = gameTime ? `<div class="match-date-label" style="color:var(--live-col)">${gameTime}</div>` : '';
+    return `<div class="match-center"><div class="score-display"><span>${match.scoreHome}</span><span class="score-separator">–</span><span>${match.scoreAway}</span></div>${timeHtml}</div>`;
   }
   const time = formatTime(match.datetime);
   const dateLabel = formatDateLabel(match.datetime);
