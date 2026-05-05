@@ -451,7 +451,11 @@ function renderCenter(match) {
 function renderTVRow(match) {
   const notifSet = isNotifSet(match.id);
   let tvHtml = match.tvChannels && match.tvChannels.length > 0
-    ? `<div class="tv-channels-group">${match.tvChannels.map(ch => `<span class="tv-chip ${tvChipClass(ch)}">📺 ${ch.short||ch.name}</span>`).join('')}</div>`
+    ? `<div class="tv-channels-group">${match.tvChannels.map(ch => `
+        <span class="tv-chip ${tvChipClass(ch)}">
+          ${ch.logo ? `<img src="${ch.logo}" alt="${ch.name}" style="height:14px;width:auto;vertical-align:middle;margin-right:3px;" onerror="this.style.display='none'">` : '📺'}
+          ${ch.short||ch.name}
+        </span>`).join('')}</div>`
     : `<span class="no-tv">Non diffusé</span>`;
   const canSetNotif = match.status === 'upcoming' || (match.status === 'live' && match.scoreHome === null && match.scoreAway === null);
   const notifHtml = canSetNotif ? `<button class="notif-btn ${notifSet?'active':''}" onclick="toggleNotif_${match.id}()">🔔 ${notifSet?'Alerté':'Alerte'}</button>` : '';
