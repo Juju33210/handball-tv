@@ -42,7 +42,7 @@ console.log(`HTML length for ${dateStr}: ${html.length}`);
 
             const name = event.name?.toLowerCase() || '';
             // Filter handball only
-            if (!isHandball(name)) continue;
+            if (!isHandball(event.name, event.publishedOn?.name)) continue;
 
             results.push({
               name: event.name,
@@ -75,26 +75,33 @@ console.log(`HTML length for ${dateStr}: ${html.length}`);
   }
 };
 
-function isHandball(name) {
-  // Positive keywords — specific to handball
-  const handballKeywords = [
-    'handball', 'starligue', 'proligue', 'ehf',
-    'hbc nantes', 'psg hand', 'paris hand',
-    'chambéry', 'chambery', 'montpellier hb',
-    'dunkerque', 'limoges', 'saint-raphaël', 'saint raphael',
-    'toulouse handball', 'fenix', 'tremblay',
-    'chartres', 'sélestat', 'selestat', 'nîmes hand', 'nimes hand',
-    'aix handball', 'dijon hand', 'istres',
-  ];
-  // Negative keywords — exclude football/other sports
-  const excludeKeywords = [
-    'fc barcelone - real', 'fc barcelone - madrid',
-    'lens -', '- lens', 'red star',
-    'fc séville', 'espanyol', 'liga', 'ligue 1',
-  ];
+function isHandball(name, channel) {
   const n = name.toLowerCase();
-  if (excludeKeywords.some(k => n.includes(k))) return false;
-  return handballKeywords.some(k => n.includes(k));
+  const c = (channel || '').toLowerCase();
+
+  // Exclude obvious football channels
+  const footballChannels = ['ligue 1', 'ligue1', 'bein sports 4', 'bein sports 5',
+    'bein sports 6', 'bein sports 7', 'bein sports 8', 'bein sports 9',
+    'canal +', 'canal+', 'tnt sports', 'prime video', 'amazon'];
+  if (footballChannels.some(k => c.includes(k))) return false;
+
+  // Exclude obvious football keywords in name
+  const footballNames = ['fc barcelone - real', 'fc barcelone - madrid',
+    'real madrid', 'liga', 'bundesliga', 'serie a', 'premier league',
+    'red star -', '- red star', 'fc séville', 'espanyol',
+    'lens -', '- lens', 'paris fc', 'paris-sg -', '- paris-sg'];
+  if (footballNames.some(k => n.includes(k))) return false;
+
+  // Must match handball keywords OR handball-specific channels
+  const handballKeywords = ['handball', 'starligue', 'proligue', 'ehf',
+    'hbc nantes', 'psg hand', 'paris hand', 'chambéry', 'chambery',
+    'montpellier hb', 'dunkerque', 'limoges', 'saint-raphaël',
+    'toulouse handball', 'fenix', 'tremblay', 'chartres', 'sélestat',
+    'selestat', 'nîmes hand', 'aix handball', 'dijon hand', 'istres'];
+  const handballChannels = ['eurosport', 'handball'];
+  
+  return handballKeywords.some(k => n.includes(k)) ||
+         handballChannels.some(k => c.includes(k));
 }
 
 export const config = { path: "/api/tv-program" };
