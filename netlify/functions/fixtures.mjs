@@ -13,10 +13,12 @@ function inferStatus(dateStr, descr) {
   if (d.includes('finished') || d.includes('ended')) return 'finished';
   if (d.includes('in progress') || d.includes('half time')) return 'live';
   // "Not started" → rely on datetime
+  // Highlightly dates are in UTC, France is UTC+2
+  // So a match at 20h00 France = 18h00 UTC
+  // We compare UTC timestamps directly
   const now = Date.now();
   const matchMs = new Date(dateStr).getTime();
   const diffMin = (now - matchMs) / 60000;
-  if (diffMin < -120) return 'upcoming'; // More than 2h in future (accounting for UTC+2)
   if (diffMin < 0) return 'upcoming';
   if (diffMin < 105) return 'live';
   return 'finished';
@@ -42,9 +44,7 @@ export default async (req) => {
       for (const m of matches) {
         // Convert UTC to France timezone (UTC+2)
         const utcDate = new Date(m.date);
-        // Add 2 hours for France timezone (UTC+2)
-const frDate = new Date(utcDate.getTime() + 2 * 60 * 60 * 1000);
-const isoFr = frDate.toISOString();
+        const isoFr = utcDate.toISOString();
 
         const status = inferStatus(m.date, m.state?.description);
         const scoreHome = m.state?.score?.current
