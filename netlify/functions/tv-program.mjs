@@ -21,7 +21,10 @@ const dateStr = `${date.getDate()}-${MONTHS_FR[date.getMonth()]}-${date.getFullY
         }
       });
 
-      if (!res.ok) continue;
+      console.log(`Fetching ${dateStr}: status ${res.status}`);
+if (!res.ok) continue;
+const html = await res.text();
+console.log(`HTML length for ${dateStr}: ${html.length}`);
       const html = await res.text();
 
       // Extract JSON-LD
