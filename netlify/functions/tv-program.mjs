@@ -79,6 +79,14 @@ function isHandball(name, channel) {
   const n = name.toLowerCase();
   const c = (channel || '').toLowerCase();
 
+  // Explicit football exclusions — always reject
+  const footballExclusions = [
+    'real madrid', 'real sociedad', 'atletico', 'fc séville', 'espanyol',
+    'lens -', '- lens', 'red star -', '- red star', 'paris fc',
+    'liga ', 'ligue 1', 'premier league', 'bundesliga', 'serie a',
+    'gravelines', 'nanterre', 'coupe du monde',
+  ];
+  if (footballExclusions.some(k => n.includes(k))) return false;
   // Explicit handball keywords — always include
   const handballKeywords = [
     'handball', 'starligue', 'proligue', 'ehf',
