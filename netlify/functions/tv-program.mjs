@@ -10,7 +10,8 @@ export default async (req) => {
     for (let i = 0; i <= 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+      const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const dateStr = `${date.getDate()}-${MONTHS_FR[date.getMonth()]}-${date.getFullYear()}`;
 
       const res = await fetch(`https://www.tvsports.fr/programme-tele/${dateStr}`, {
         headers: {
