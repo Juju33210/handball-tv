@@ -77,12 +77,25 @@ console.log(`HTML length for ${dateStr}: ${html.length}`);
 };
 
 function isHandball(name) {
-  const keywords = [
-    'handball', 'hand', 'starligue', 'proligue', 'nantes', 'psg hand',
-    'montpellier', 'barcelone', 'champions league', 'european league',
-    'ehf', 'ligue des champions'
+  // Positive keywords — specific to handball
+  const handballKeywords = [
+    'handball', 'starligue', 'proligue', 'ehf',
+    'hbc nantes', 'psg hand', 'paris hand',
+    'chambéry', 'chambery', 'montpellier hb',
+    'dunkerque', 'limoges', 'saint-raphaël', 'saint raphael',
+    'toulouse handball', 'fenix', 'tremblay',
+    'chartres', 'sélestat', 'selestat', 'nîmes hand', 'nimes hand',
+    'aix handball', 'dijon hand', 'istres',
   ];
-  return keywords.some(k => name.includes(k));
+  // Negative keywords — exclude football/other sports
+  const excludeKeywords = [
+    'fc barcelone - real', 'fc barcelone - madrid',
+    'lens -', '- lens', 'red star',
+    'fc séville', 'espanyol', 'liga', 'ligue 1',
+  ];
+  const n = name.toLowerCase();
+  if (excludeKeywords.some(k => n.includes(k))) return false;
+  return handballKeywords.some(k => n.includes(k));
 }
 
 export const config = { path: "/api/tv-program" };
