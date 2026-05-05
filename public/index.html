@@ -619,12 +619,44 @@ window.showPage = function(name) {
 async function fetchMatches() {
   document.getElementById('refreshBtn').classList.add('spinning');
   try {
-    const res = await fetch('/api/matches');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    state.matches = data.matches || []; state.lastUpdate = data.scrapedAt; state.loading = false; renderMatches();
-  } catch (err) { console.error('Fetch error:', err); state.loading = false; renderMatches(); }
-  finally { document.getElementById('refreshBtn').classList.remove('spinning'); }
+    // Fetch both sources in parallel
+    const [lnhRes, fixturesRes] = await Promise.all([
+      fetch('/api/matches'),
+      fetch('/api/fixtures')
+    ]);
+    const lnhData = lnhRes.ok ? await lnhRes.json() : { matches: [] };
+    const fixturesData = fixturesRes.ok ? await fixturesRes.json() : { matches: [] };
+
+    const lnhMatches = lnhData.matches || [];
+    const fixtureMatches = fixturesData.matches || [];
+
+    // Merge: keep lnh matches + add fixtures not already in lnh
+    const lnhIds = new Set(lnhMatches.map(m => `${m.homeTeam}-${m.awayTeam}-${m.datetime?.substring(0,10)}`));
+    const newFixtures = fixtureMatches.filter(m => {
+      const key = `${m.homeTeam}-${m.awayTeam}-${m.datetime?.substring(0,10)}`;
+      return !lnhIds.has(key);
+    });
+
+    // Sort all by date
+    const order = { live: 0, upcoming: 1, finished: 2 };
+    const all = [...lnhMatches, ...newFixtures].sort((a, b) => {
+      const sd = order[a.status] - order[b.status];
+      if (sd !== 0) return sd;
+      if (a.datetime && b.datetime) return new Date(a.datetime) - new Date(b.datetime);
+      return 0;
+    });
+
+    state.matches = all;
+    state.lastUpdate = lnhData.scrapedAt;
+    state.loading = false;
+    renderMatches();
+  } catch (err) {
+    console.error('Fetch error:', err);
+    state.loading = false;
+    renderMatches();
+  } finally {
+    document.getElementById('refreshBtn').classList.remove('spinning');
+  }
 }
 document.getElementById('filters').addEventListener('click', (e) => {
   const btn = e.target.closest('.filter-btn'); if (!btn) return;
