@@ -62,7 +62,12 @@ function parseDateTime(dateTimeStr) {
   const hour  = parseInt(m[3]);
   const min   = parseInt(m[4]);
   const year  = new Date().getFullYear();
-  return new Date(year, month, day, hour, min).toISOString();
+  // Crée la date en heure française (UTC+1 hiver / UTC+2 été)
+const date = new Date(year, month, day, hour, min);
+// Offset France : détecté automatiquement via Intl
+const tzOffset = new Date().toLocaleString('fr-FR', {timeZone: 'Europe/Paris', timeZoneName: 'short'}).includes('UTC+2') ? 2 : 1;
+date.setHours(date.getHours() - tzOffset);
+return date.toISOString();
 }
 
 function inferStatus(isoDatetime, isFinish, isLive) {
