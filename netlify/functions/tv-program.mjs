@@ -79,28 +79,33 @@ function isHandball(name, channel) {
   const n = name.toLowerCase();
   const c = (channel || '').toLowerCase();
 
-  // Exclude obvious football channels
-  const footballChannels = ['ligue 1', 'ligue1', 'bein sports 4', 'bein sports 5',
-    'bein sports 6', 'bein sports 7', 'bein sports 8', 'bein sports 9',
-    'canal +', 'canal+', 'tnt sports', 'prime video', 'amazon'];
-  if (footballChannels.some(k => c.includes(k))) return false;
+  // Explicit handball keywords — always include
+  const handballKeywords = [
+    'handball', 'starligue', 'proligue', 'ehf',
+    'hbc nantes', 'psg hand', 'paris hand',
+    'chambéry', 'chambery', 'montpellier hb',
+    'dunkerque handball', 'limoges handball',
+    'saint-raphaël', 'toulouse handball', 'fenix toulouse',
+    'tremblay', 'chartres handball', 'sélestat', 'selestat',
+    'nîmes hand', 'nimes hand', 'aix handball', 'dijon hand',
+    'istres handball',
+  ];
+  if (handballKeywords.some(k => n.includes(k))) return true;
 
-  // Exclude obvious football keywords in name
-  const footballNames = ['fc barcelone - real', 'fc barcelone - madrid',
-    'real madrid', 'liga', 'bundesliga', 'serie a', 'premier league',
-    'red star -', '- red star', 'fc séville', 'espanyol',
-    'lens -', '- lens', 'paris fc', 'paris-sg -', '- paris-sg'];
-  if (footballNames.some(k => n.includes(k))) return false;
+  // For team names without "handball" — only include if on handball channels
+  const handballTeams = [
+    'chambéry -', '- chambéry', 'chambery -', '- chambery',
+    'toulouse -', '- toulouse', 'aix-en-provence -', '- aix-en-provence',
+    'dunkerque -', '- dunkerque', 'limoges -', '- limoges',
+    'tremblay -', '- tremblay', 'chartres -', '- chartres',
+    'sélestat -', '- sélestat', 'istres -', '- istres',
+    'nantes -', '- nantes', 'barcelone -', '- barcelone',
+    'montpellier -', '- montpellier',
+  ];
+  const handballChannels = ['bein sports 1', 'bein sports 2', 'bein sports 3',
+    'bein sports max', 'handball tv', 'eurosport 1', 'eurosport 2'];
 
-  // Must match handball keywords OR handball-specific channels
-  const handballKeywords = ['handball', 'starligue', 'proligue', 'ehf',
-    'hbc nantes', 'psg hand', 'paris hand', 'chambéry', 'chambery',
-    'montpellier hb', 'dunkerque', 'limoges', 'saint-raphaël',
-    'toulouse handball', 'fenix', 'tremblay', 'chartres', 'sélestat',
-    'selestat', 'nîmes hand', 'aix handball', 'dijon hand', 'istres'];
-  const handballChannels = ['eurosport', 'handball'];
-  
-  return handballKeywords.some(k => n.includes(k)) ||
+  return handballTeams.some(k => n.includes(k)) &&
          handballChannels.some(k => c.includes(k));
 }
 
