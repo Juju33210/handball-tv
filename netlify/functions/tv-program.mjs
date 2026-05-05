@@ -62,7 +62,7 @@ console.log(`HTML length for ${dateStr}: ${html.length}`);
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=3600',
+          'Cache-Control': 'no-cache',
           'Access-Control-Allow-Origin': '*',
         }
       }
