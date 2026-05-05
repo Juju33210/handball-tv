@@ -4,19 +4,19 @@
 const LNH_URL = "https://www.lnh.fr";
 
 const TV_CHANNELS = {
-  hd1:       { name: "beIN Sports 1",   short: "beIN 1",   cssClass: "bein" },
-  hd2:       { name: "beIN Sports 2",   short: "beIN 2",   cssClass: "bein" },
-  hd3:       { name: "beIN Sports 3",   short: "beIN 3",   cssClass: "bein" },
-  "bein-web":{ name: "beIN Sports",     short: "beIN",     cssClass: "bein" },
-  "10max":   { name: "beIN Max 10",     short: "beIN Max", cssClass: "bein" },
-  htvsmall:  { name: "Handball TV",     short: "HTV",      cssClass: "htv"  },
-  htv:       { name: "Handball TV",     short: "HTV",      cssClass: "htv"  },
-  tf1:       { name: "TF1",             short: "TF1",      cssClass: "free" },
-  m6:        { name: "M6",              short: "M6",       cssClass: "free" },
-  "l-equipe":{ name: "L'Équipe",        short: "L'Éq.",    cssClass: "free" },
-  lequipe:   { name: "L'Équipe",        short: "L'Éq.",    cssClass: "free" },
-  canal:     { name: "Canal+",          short: "C+",       cssClass: "other"},
-  eurosport: { name: "Eurosport",       short: "Euro",     cssClass: "other"},
+  hd1:       { name: "beIN Sports 1",   short: "beIN 1",   cssClass: "bein", logo: "https://www.tvsports.fr/assets/icons/tv/bein1.webp" },
+  hd2:       { name: "beIN Sports 2",   short: "beIN 2",   cssClass: "bein", logo: "https://www.tvsports.fr/assets/icons/tv/bein2.webp" },
+  hd3:       { name: "beIN Sports 3",   short: "beIN 3",   cssClass: "bein", logo: "https://www.tvsports.fr/assets/icons/tv/bein3.webp" },
+  "bein-web":{ name: "beIN Sports",     short: "beIN",     cssClass: "bein", logo: "https://www.tvsports.fr/assets/icons/tv/bein1.webp" },
+  "10max":   { name: "beIN Max 10",     short: "beIN Max", cssClass: "bein", logo: "https://www.tvsports.fr/assets/icons/tv/bein-max10.webp" },
+  htvsmall:  { name: "Handball TV",     short: "HTV",      cssClass: "htv",  logo: "https://www.tvsports.fr/assets/icons/tv/handballtv.webp" },
+  htv:       { name: "Handball TV",     short: "HTV",      cssClass: "htv",  logo: "https://www.tvsports.fr/assets/icons/tv/handballtv.webp" },
+  tf1:       { name: "TF1",             short: "TF1",      cssClass: "free", logo: "https://www.tvsports.fr/assets/icons/tv/tf1.webp" },
+  m6:        { name: "M6",              short: "M6",       cssClass: "free", logo: "https://www.tvsports.fr/assets/icons/tv/m6.webp" },
+  "l-equipe":{ name: "L'Équipe",        short: "L'Éq.",    cssClass: "free", logo: "https://www.tvsports.fr/assets/icons/tv/lequipe.webp" },
+  lequipe:   { name: "L'Équipe",        short: "L'Éq.",    cssClass: "free", logo: "https://www.tvsports.fr/assets/icons/tv/lequipe.webp" },
+  canal:     { name: "Canal+",          short: "C+",       cssClass: "other", logo: "https://www.tvsports.fr/assets/icons/tv/canal+.webp" },
+  eurosport: { name: "Eurosport",       short: "Euro",     cssClass: "other", logo: "https://www.tvsports.fr/assets/icons/tv/eurosport1.webp" },
 };
 
 function detectChannel(imgSrc) {
