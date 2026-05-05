@@ -172,6 +172,45 @@ function parseMatchesFromHtml(html) {
   return matches;
 }
 
+async function fetchTVProgram() {
+  try {
+    const res = await fetch('https://handball-tv.netlify.app/api/tv-program');
+    const data = await res.json();
+    return data.events || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function findTVChannel(match, tvEvents) {
+  if (!match.datetime) return null;
+  const matchTime = new Date(match.datetime).getTime();
+  const home = match.homeTeam.toLowerCase();
+  const away = match.awayTeam.toLowerCase();
+
+  for (const event of tvEvents) {
+    const eventTime = new Date(event.startDate).getTime();
+    const diffMin = Math.abs(matchTime - eventTime) / 60000;
+    if (diffMin > 60) continue; // Must be within 60 min
+
+    const eventName = event.name.toLowerCase();
+    // Check if both teams appear in event name
+    const homeShort = home.split(' ')[0];
+    const awayShort = away.split(' ')[0];
+    if (eventName.includes(homeShort) || eventName.includes(awayShort)) {
+      return {
+        name: event.channel,
+        short: event.channel?.replace('beIN Sports', 'beIN').replace('Eurosport', 'Euro'),
+        cssClass: event.channel?.toLowerCase().includes('bein') ? 'bein' :
+                  event.channel?.toLowerCase().includes('eurosport') ? 'other' :
+                  event.channel?.toLowerCase().includes('handball') ? 'htv' : 'other',
+        logo: event.channelLogo,
+      };
+    }
+  }
+  return null;
+}
+
 async function scrapeMatches() {
   const res = await fetch(LNH_URL, {
     headers: {
@@ -183,7 +222,22 @@ async function scrapeMatches() {
   });
   if (!res.ok) throw new Error(`LNH fetch failed: ${res.status}`);
   const html = await res.text();
-  return parseMatchesFromHtml(html);
+  const matches = parseMatchesFromHtml(html);
+
+  // Enrich with TV channels from tvsports.fr
+  const tvEvents = await fetchTVProgram();
+  for (const match of matches) {
+    if (!match.tvChannel && tvEvents.length > 0) {
+      const found = findTVChannel(match, tvEvents);
+      if (found) {
+        match.tvChannel = found;
+        match.tvChannels = [found];
+        match.tvOnly = true;
+      }
+    }
+  }
+
+  return matches;
 }
 
 export default async (req) => {
