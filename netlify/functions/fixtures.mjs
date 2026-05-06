@@ -8,6 +8,26 @@ const LEAGUES = [
   { id: 31420, name: "ProLigue", short: "ProLigue", flag: "🇫🇷" },
 ];
 
+// Logo mapping from lnh.fr for known teams
+const LNH_LOGOS = {
+  "PSG": "https://www.lnh.fr/medias/sports_teams/paris__logo__2024-2025.png",
+  "Nantes": "https://www.lnh.fr/medias/sports_teams/nantes__logo__2023-2024.png",
+  "Montpellier": "https://www.lnh.fr/medias/sports_teams/montpellier__logo__2024-2025.png",
+  "Chambéry Savoie": "https://www.lnh.fr/medias/sports_teams/chambery__logo__2024-2025.png",
+  "Saint-Raphaël Var Handball": "https://www.lnh.fr/medias/sports_teams/saint-raphael__logo__2024-2025.png",
+  "Fenix Toulouse Handball": "https://www.lnh.fr/medias/sports_teams/toulouse__logo__2023-2024.png",
+  "Tremblay": "https://www.lnh.fr/medias/sports_teams/tremblay__logo__2023-2024.png",
+  "Provence Aix": "https://www.lnh.fr/medias/sports_teams/aix__logo__2025-2026.png",
+  "Cesson-Rennes Métropole": "https://www.lnh.fr/medias/sports_teams/cesson__logo__2023-2024.png",
+  "USAM Nîmes Gard": "https://www.lnh.fr/medias/sports_teams/nimes__logo__2025-2026.png",
+  "Selestat Alsace Handball": "https://www.lnh.fr/medias/sports_teams/selestat__logo__2023-2024.png",
+  "Dunkerque": "https://www.lnh.fr/medias/sports_teams/dunkerque__logo__2023-2024.png",
+  "Chartres": "https://www.lnh.fr/medias/sports_teams/chartres__logo__2023-2024.png",
+  "Dijon": "https://www.lnh.fr/medias/sports_teams/dijon__logo__2023-2024.png",
+  "Istres": "https://www.lnh.fr/medias/sports_teams/istres__logo__2023-2024.png",
+  "Limoges": "https://www.lnh.fr/medias/sports_teams/limoges__logo__2023-2024.png",
+};
+
 function inferStatus(dateStr, descr) {
   const d = descr?.toLowerCase() || '';
   if (d.includes('finished') || d.includes('ended')) return 'finished';
@@ -63,8 +83,8 @@ export default async (req) => {
           datetime: isoFr,
           homeTeam: m.homeTeam?.name,
           awayTeam: m.awayTeam?.name,
-          homeLogo: m.homeTeam?.logo?.replace('https://highlightly.net', 'https://www.highlightly.net') || null,
-          awayLogo: m.awayTeam?.logo?.replace('https://highlightly.net', 'https://www.highlightly.net') || null,
+          homeLogo: m.homeTeam?.logo?.replace('https://highlightly.net', 'https://www.highlightly.net') || LNH_LOGOS[m.homeTeam?.name] || null,
+          awayLogo: m.awayTeam?.logo?.replace('https://highlightly.net', 'https://www.highlightly.net') || LNH_LOGOS[m.awayTeam?.name] || null,
           scoreHome,
           scoreAway,
           tvChannel: null,
