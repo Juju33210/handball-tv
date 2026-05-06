@@ -407,6 +407,18 @@ async function toggleNotif(match) {
     const granted = await requestNotifPermission();
     if (!granted) { showToast('❌ Permission refusée'); return; }
   }
+  state.notifications.push({
+    id: match.id, homeTeam: match.homeTeam, awayTeam: match.awayTeam,
+    datetime: match.datetime, competition: match.competitionShort,
+    tvChannel: match.tvChannel?.name || null, notified: false,
+  });
+  saveNotifs(); showToast('🔔 Alerte activée !'); renderNotifPage(); renderMatches();
+}
+  }
+  if (state.notifPermission !== 'granted') {
+    const granted = await requestNotifPermission();
+    if (!granted) { showToast('❌ Permission refusée'); return; }
+  }
   if (match.datetime) {
     const alertMs = new Date(match.datetime).getTime() - 15 * 60 * 1000;
     const delay = alertMs - Date.now();
@@ -678,8 +690,30 @@ document.getElementById('notifAllow').addEventListener('click', async () => {
   showToast(granted ? '✅ Notifications activées !' : '❌ Permission refusée');
 });
 document.getElementById('notifDismiss').addEventListener('click', () => { document.getElementById('notifPanel').classList.remove('show'); });
+function checkNotifications() {
+  if (state.notifPermission !== 'granted') return;
+  const now = Date.now();
+  state.notifications.forEach(n => {
+    if (n.notified) return;
+    if (!n.datetime) return;
+    const matchMs = new Date(n.datetime).getTime();
+    const diffMin = (matchMs - now) / 60000;
+    if (diffMin <= 15 && diffMin >= -5) {
+      new Notification(`🤾 ${n.homeTeam} vs ${n.awayTeam}`, {
+        body: `Coup d'envoi${diffMin > 0 ? ` dans ${Math.round(diffMin)} min` : ' maintenant'}${n.tvChannel ? ` sur ${n.tvChannel}` : ''} !`,
+        icon: '/favicon.ico',
+        tag: `hbtv-${n.id}`,
+      });
+      n.notified = true;
+      saveNotifs();
+    }
+  });
+}
+
 setInterval(fetchMatches, 3 * 60 * 1000);
+setInterval(checkNotifications, 60 * 1000); // Check every minute
 fetchMatches();
+checkNotifications();
 setTimeout(() => { if (Notification?.permission === 'default') document.getElementById('notifPanel').classList.add('show'); }, 5000);
 </script>
 </body>
