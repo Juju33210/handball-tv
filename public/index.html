@@ -401,7 +401,6 @@ async function toggleNotif(match) {
       clearTimeout(state.timers[match.id]); delete state.timers[match.id];
       state.notifications.splice(idx, 1); saveNotifs();
       showToast('🔕 Alerte supprimée'); renderNotifPage(); renderMatches(); return;
-    }
   }
   if (state.notifPermission !== 'granted') {
     const granted = await requestNotifPermission();
