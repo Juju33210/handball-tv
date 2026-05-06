@@ -26,6 +26,21 @@ const LNH_LOGOS = {
   "Dijon": "https://www.lnh.fr/medias/sports_teams/dijon__logo__2023-2024.png",
   "Istres": "https://www.lnh.fr/medias/sports_teams/istres__logo__2023-2024.png",
   "Limoges": "https://www.lnh.fr/medias/sports_teams/limoges__logo__2023-2024.png",
+  "Pau Billere": "https://www.lnh.fr/medias/sports_teams/pau-billere__logo__2024-2025.png",
+  "Pau Billère": "https://www.lnh.fr/medias/sports_teams/pau-billere__logo__2024-2025.png",
+  "Ivry": "https://www.lnh.fr/medias/sports_teams/ivry__logo__2023-2024.png",
+  "Caen Handball": "https://www.lnh.fr/medias/sports_teams/caen__logo__2024-2025.png",
+  "US Créteil": "https://www.lnh.fr/medias/sports_teams/creteil__logo__2025-2026.png",
+  "Massy Essonne HB": "https://www.lnh.fr/medias/sports_teams/massy__logo__2023-2024.png",
+  "Pontault-Combault Handball": "https://www.lnh.fr/medias/sports_teams/pontault__logo__2023-2024.png",
+  "Cherbourg": "https://www.lnh.fr/medias/sports_teams/cherbourg__logo__2023-2024.png",
+  "Frontignan": "https://www.lnh.fr/medias/sports_teams/frontignan__logo__2023-2024.png",
+  "Valence": "https://www.lnh.fr/medias/sports_teams/valence__logo__2024-2025.png",
+  "Besançon": "https://www.lnh.fr/medias/sports_teams/besancon__logo__2023-2024.png",
+  "Sarrebourg": "https://www.lnh.fr/medias/sports_teams/sarrebourg__logo__2023-2024.png",
+  "Saran Loiret Handball": "https://www.lnh.fr/medias/sports_teams/saran__logo__2024-2025.png",
+  "Angers": "https://www.lnh.fr/medias/sports_teams/angers__logo__2023-2024.png",
+  "Saintes": "https://www.lnh.fr/medias/sports_teams/saintes__logo__2025-2026.png",
 };
 
 function inferStatus(dateStr, descr) {
