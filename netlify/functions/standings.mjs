@@ -23,7 +23,13 @@ export default async (req) => {
       }
     );
     const data = await res.json();
-    const standings = data?.groups?.[0]?.standings || [];
+    const standings = (data?.groups?.[0]?.standings || []).map(t => ({
+  ...t,
+  team: {
+    ...t.team,
+    logo: t.team.logo || LNH_LOGOS[t.team.name] || null,
+  }
+}));
 
     return new Response(
       JSON.stringify({ standings, league: league.name, updatedAt: new Date().toISOString() }),
