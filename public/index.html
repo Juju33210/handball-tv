@@ -19,6 +19,13 @@
       --shadow:0 2px 12px rgba(0,0,0,0.07);--shadow-md:0 4px 24px rgba(0,0,0,0.10);
       --radius:14px;--radius-sm:8px;
       --font-cond:'Barlow Condensed',sans-serif;--font-body:'Barlow',sans-serif;
+      /* Couleurs par compétition */
+      --comp-champions:#1a56db;--comp-champions-bg:#eef3fd;--comp-champions-light:#c7d9f8;
+      --comp-starligue:#e8193c;--comp-starligue-bg:#fdeef1;--comp-starligue-light:#f7b8c2;
+      --comp-proligue:#ff6b00;--comp-proligue-bg:#fff4ec;--comp-proligue-light:#ffd4b0;
+      --comp-european:#0ea5e9;--comp-european-bg:#e8f7fd;--comp-european-light:#b0e0f7;
+      --comp-cdf:#7c3aed;--comp-cdf-bg:#f3eeff;--comp-cdf-light:#d4b8f7;
+      --comp-default:#9a9fb8;--comp-default-bg:#f5f6fa;--comp-default-light:#d0d3e8;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
@@ -58,7 +65,7 @@
     .section-line{flex:1;height:1px;background:var(--border)}
     .section-header.live-section .section-title{color:var(--live-col)}
     .section-header.upcoming-section .section-title{color:var(--upcoming)}
-    .match-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto 1fr;position:relative;overflow:hidden;transition:box-shadow 0.15s,transform 0.1s}
+    .match-card{background:var(--surface);border:1.5px solid var(--comp-card-border, var(--border));border-left:4px solid var(--comp-card-color, var(--comp-default));border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto 1fr;position:relative;overflow:hidden;transition:box-shadow 0.15s,transform 0.1s}
     .match-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
     .match-card.is-live{border-color:#a8e6c4;background:linear-gradient(135deg,#f0fbf5 0%,#fff 50%)}
     .match-card.is-live::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--live-col)}
@@ -66,8 +73,8 @@
     .match-card.is-star{border-color:#ffc999}
     .match-card.is-star::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
     .card-top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .comp-badge{display:flex;align-items:center;gap:5px;font-family:var(--font-cond);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-faint)}
-    .comp-round{opacity:0.7;margin-left:2px}
+    .comp-badge{display:flex;align-items:center;gap:5px;font-family:var(--font-cond);font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#fff;background:var(--comp-card-color, var(--comp-default));padding:2px 8px;border-radius:4px}
+    .comp-round{opacity:0.75;margin-left:2px}
     .card-right-meta{display:flex;align-items:center;gap:6px}
     .live-badge{display:flex;align-items:center;gap:4px;background:var(--live-bg);border:1px solid #a8e6c4;border-radius:5px;padding:2px 7px;font-family:var(--font-cond);font-size:0.65rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--live-col)}
     .live-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--live-col);animation:blink 1.2s infinite}
@@ -378,12 +385,29 @@ function renderTVRow(match) {
   return `<div class="tv-channel">${tvHtml}${notifHtml}</div>`;
 }
 
+function getCompetitionStyle(competition) {
+  const c = (competition || '').toLowerCase();
+  if (c.includes('champions') || c.includes('ldc') || c.includes('ucl') || c.includes('velux'))
+    return { color: 'var(--comp-champions)', border: 'var(--comp-champions-light)', bg: 'var(--comp-champions-bg)' };
+  if (c.includes('starligue') || c.includes('star ligue') || c.includes('liqui moly'))
+    return { color: 'var(--comp-starligue)', border: 'var(--comp-starligue-light)', bg: 'var(--comp-starligue-bg)' };
+  if (c.includes('proligue') || c.includes('pro ligue') || c.includes('nationale 1'))
+    return { color: 'var(--comp-proligue)', border: 'var(--comp-proligue-light)', bg: 'var(--comp-proligue-bg)' };
+  if (c.includes('european') || c.includes('elf') || c.includes('euro league') || c.includes('ehf cup'))
+    return { color: 'var(--comp-european)', border: 'var(--comp-european-light)', bg: 'var(--comp-european-bg)' };
+  if (c.includes('coupe') || c.includes('cdf'))
+    return { color: 'var(--comp-cdf)', border: 'var(--comp-cdf-light)', bg: 'var(--comp-cdf-bg)' };
+  return { color: 'var(--comp-default)', border: 'var(--comp-default-light)', bg: 'var(--comp-default-bg)' };
+}
+
 function renderCard(match) {
   const isActuallyLive = match.status==='live' && (match.scoreHome!==null||match.scoreAway!==null);
+  const compStyle = getCompetitionStyle(match.competition);
   const classes = ['match-card',isActuallyLive?'is-live':'',match.status==='finished'?'is-finished':'',match.isStarMatch?'is-star':''].filter(Boolean).join(' ');
+  const styleAttr = `style="--comp-card-color:${compStyle.color};--comp-card-border:${compStyle.border};background:${compStyle.bg}"`;
   const liveBadge = isActuallyLive ? `<span class="live-badge">Direct</span>` : '';
   const starBadge = match.isStarMatch ? `<span class="star-badge">⭐ Star Match</span>` : '';
-  return `<div class="${classes}" id="match-${match.id}">
+  return `<div class="${classes}" id="match-${match.id}" ${styleAttr}>
     <div class="card-top">
       <span class="comp-badge"><span>${match.competitionFlag}</span> ${match.competitionShort} <span class="comp-round">${match.round}</span></span>
       <div class="card-right-meta">${starBadge}${liveBadge}</div>
