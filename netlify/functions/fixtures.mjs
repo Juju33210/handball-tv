@@ -8,7 +8,6 @@ const LEAGUES = [
   { id: 31420, name: "ProLigue", short: "ProLigue", flag: "🇫🇷" },
 ];
 
-// Logo mapping from lnh.fr for known teams
 const LNH_LOGOS = {
   "PSG": "https://www.lnh.fr/medias/sports_teams/paris__logo__2024-2025.png",
   "Nantes": "https://www.lnh.fr/medias/sports_teams/nantes__logo__2023-2024.png",
@@ -47,16 +46,42 @@ function inferStatus(dateStr, descr) {
   const d = descr?.toLowerCase() || '';
   if (d.includes('finished') || d.includes('ended')) return 'finished';
   if (d.includes('in progress') || d.includes('half time')) return 'live';
-  // "Not started" → rely on datetime
-  // Highlightly dates are in UTC, France is UTC+2
-  // So a match at 20h00 France = 18h00 UTC
-  // We compare UTC timestamps directly
   const now = Date.now();
   const matchMs = new Date(dateStr).getTime();
   const diffMin = (now - matchMs) / 60000;
   if (diffMin < 0) return 'upcoming';
   if (diffMin < 105) return 'live';
   return 'finished';
+}
+
+function findTVChannel(match, tvEvents) {
+  const matchTime = new Date(match.datetime).getTime();
+  const home = match.homeTeam?.toLowerCase() || '';
+  const away = match.awayTeam?.toLowerCase() || '';
+
+  for (const event of tvEvents) {
+    const eventTime = new Date(event.startDate).getTime();
+    const diffMin = Math.abs(matchTime - eventTime) / 60000;
+    if (diffMin > 60) continue;
+
+    const eventName = event.name.toLowerCase();
+    const homeWords = home.split(' ');
+    const awayWords = away.split(' ');
+    const homeMatches = homeWords.some(w => w.length > 3 && eventName.includes(w));
+    const awayMatches = awayWords.some(w => w.length > 3 && eventName.includes(w));
+
+    if (homeMatches || awayMatches) {
+      return {
+        name: event.channel,
+        short: event.channel?.replace('beIN Sports', 'beIN').replace('Eurosport', 'Euro'),
+        cssClass: event.channel?.toLowerCase().includes('bein') ? 'bein' :
+                  event.channel?.toLowerCase().includes('eurosport') ? 'other' :
+                  event.channel?.toLowerCase().includes('handball') ? 'htv' : 'other',
+        logo: event.channelLogo,
+      };
+    }
+  }
+  return null;
 }
 
 export default async (req) => {
@@ -77,17 +102,11 @@ export default async (req) => {
       const matches = data.data || [];
 
       for (const m of matches) {
-        // Convert UTC to France timezone (UTC+2)
         const utcDate = new Date(m.date);
         const isoFr = utcDate.toISOString();
-
         const status = inferStatus(m.date, m.state?.description);
-        const scoreHome = m.state?.score?.current
-          ? parseInt(m.state.score.current.split(':')[0])
-          : null;
-        const scoreAway = m.state?.score?.current
-          ? parseInt(m.state.score.current.split(':')[1])
-          : null;
+        const scoreHome = m.state?.score?.current ? parseInt(m.state.score.current.split(':')[0]) : null;
+        const scoreAway = m.state?.score?.current ? parseInt(m.state.score.current.split(':')[1]) : null;
 
         allMatches.push({
           id: m.id,
@@ -112,7 +131,7 @@ export default async (req) => {
       }
     }
 
-    // Filter only upcoming matches beyond today
+    // Filter only upcoming matches
     const now = new Date();
     const upcoming = allMatches
       .filter(m => new Date(m.datetime) > now)
@@ -125,38 +144,11 @@ export default async (req) => {
       const tvEvents = tvData.events || [];
 
       for (const match of upcoming) {
-        const matchTime = new Date(match.datetime).getTime();
-        const home = match.homeTeam?.toLowerCase() || '';
-        const away = match.awayTeam?.toLowerCase() || '';
-
-        for (const event of tvEvents) {
-          const eventTime = new Date(event.startDate).getTime();
-          const diffMin = Math.abs(matchTime - eventTime) / 60000;
-          if (diffMin > 60) continue;
-
-          const eventName = event.name.toLowerCase();
-          const homeShort = home.split(' ')[0];
-const awayShort = away.split(' ')[0];
-// Also check reverse — tvsports may use city name instead of club name
-const homeWords = home.split(' ');
-const awayWords = away.split(' ');
-const homeMatches = homeWords.some(w => w.length > 3 && eventName.includes(w));
-const awayMatches = awayWords.some(w => w.length > 3 && eventName.includes(w));
-if (homeMatches || awayMatches) {
-          if (eventName.includes(homeShort) || eventName.includes(awayShort)) {
-            const ch = {
-              name: event.channel,
-              short: event.channel?.replace('beIN Sports', 'beIN').replace('Eurosport', 'Euro'),
-              cssClass: event.channel?.toLowerCase().includes('bein') ? 'bein' :
-                        event.channel?.toLowerCase().includes('eurosport') ? 'other' :
-                        event.channel?.toLowerCase().includes('handball') ? 'htv' : 'other',
-              logo: event.channelLogo,
-            };
-            match.tvChannel = ch;
-            match.tvChannels = [ch];
-            match.tvOnly = true;
-            break;
-          }
+        const ch = findTVChannel(match, tvEvents);
+        if (ch) {
+          match.tvChannel = ch;
+          match.tvChannels = [ch];
+          match.tvOnly = true;
         }
       }
     } catch (e) {
