@@ -599,18 +599,16 @@ async function fetchMatches() {
     const lnhMatches = lnhData.matches || [];
     const fixtureMatches = fixturesData.matches || [];
     const today = new Date().toISOString().substring(0, 10);
-// For today's matches, always use lnh.fr (has TV channels)
-// For future matches, use Highlightly fixtures
+// Always use lnh.fr matches as base (they have TV channels)
+// Only add fixtures for FUTURE dates not covered by lnh.fr
+const lnhDates = new Set(lnhMatches.map(m => m.datetime?.substring(0, 10)));
 const newFixtures = fixtureMatches.filter(m => {
   const matchDate = m.datetime?.substring(0, 10);
-  // Exclude today's matches from fixtures — lnh.fr covers them better
+  // Only keep fixtures for dates not covered at all by lnh.fr
+  if (lnhDates.has(matchDate)) return false;
+  // And only future dates
   if (matchDate <= today) return false;
-  // For future matches, check if already in lnh
-  const mHome = m.homeTeam?.toLowerCase().split(' ')[0];
-  return !lnhMatches.some(l => 
-    l.homeTeam?.toLowerCase().split(' ')[0] === mHome &&
-    l.datetime?.substring(0, 10) === matchDate
-  );
+  return true;
 });
     const order = { live:0, upcoming:1, finished:2 };
     const all = [...lnhMatches, ...newFixtures].sort((a,b) => {
