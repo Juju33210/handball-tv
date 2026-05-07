@@ -349,7 +349,17 @@ function renderTeam(name, logo, side) {
     : `<div class="team-away"><span class="team-name">${name}</span>${logoHtml}${placeholder}</div>`;
 }
 
-function getGameTime(isoDatetime) {
+function getGameTime(isoDatetime, sofaMinute, sofaStatus) {
+  // Use real SofaScore time if available
+  if (sofaStatus) {
+    const s = sofaStatus.toLowerCase();
+    if (s.includes('halftime') || s.includes('half time') || s === 'ht') return 'Mi-temps';
+    if (sofaMinute !== null && sofaMinute !== undefined) {
+      if (sofaMinute <= 30) return `1MT ${sofaMinute}'`;
+      return `2MT ${sofaMinute - 30}'`;
+    }
+  }
+  // Fallback to approximate calculation
   const elapsed = Math.floor((Date.now() - new Date(isoDatetime).getTime()) / 60000);
   if (elapsed < 40) return `1MT ${elapsed}'`;
   if (elapsed < 55) return 'Mi-temps';
@@ -359,7 +369,7 @@ function getGameTime(isoDatetime) {
 
 function renderCenter(match) {
   if ((match.status==='finished'||match.status==='live') && match.scoreHome !== null) {
-    const gameTime = match.status==='live' && match.datetime ? getGameTime(match.datetime) : null;
+    const gameTime = match.status==='live' && match.datetime ? getGameTime(match.datetime, match.sofaMinute, match.sofaStatus) : null;
     const timeHtml = gameTime ? `<div class="match-date-label" style="color:var(--live-col)">${gameTime}</div>` : '';
     return `<div class="match-center"><div class="score-display"><span>${match.scoreHome}</span><span class="score-separator">–</span><span>${match.scoreAway}</span></div>${timeHtml}</div>`;
   }
@@ -523,6 +533,58 @@ function showPage(name) {
 }
 window.showPage = showPage;
 
+async function fetchSofaScoreLive() {
+  try {
+    const today = new Date().toISOString().substring(0, 10);
+    const res = await fetch(
+      `https://api.sofascore.com/api/v1/sport/handball/scheduled-events/${today}`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    const data = await res.json();
+    return data.events || [];
+  } catch (e) {
+    console.error('SofaScore error:', e);
+    return [];
+  }
+}
+
+function enrichMatchesWithSofaScore(matches, sofaEvents) {
+  if (!sofaEvents.length) return matches;
+  return matches.map(match => {
+    const mHome = match.homeTeam?.toLowerCase().split(' ')[0];
+    const mAway = match.awayTeam?.toLowerCase().split(' ')[0];
+    const matchDate = match.datetime?.substring(0, 10);
+    const today = new Date().toISOString().substring(0, 10);
+    if (matchDate !== today) return match;
+
+    const sofa = sofaEvents.find(e => {
+      const sHome = e.homeTeam?.name?.toLowerCase().split(' ')[0];
+      const sAway = e.awayTeam?.name?.toLowerCase().split(' ')[0];
+      return (sHome === mHome && sAway === mAway) ||
+             (sHome === mAway && sAway === mHome);
+    });
+
+    if (!sofa) return match;
+
+    const statusMap = {
+      'notstarted': 'upcoming',
+      'inprogress': 'live',
+      'finished': 'finished',
+      'afterextratime': 'finished',
+      'afterpenalties': 'finished',
+      'halftime': 'live',
+      'pause': 'live',
+    };
+
+    const scoreHome = sofa.homeScore?.current ?? match.scoreHome;
+    const scoreAway = sofa.awayScore?.current ?? match.scoreAway;
+    const status = statusMap[sofa.status?.type] || match.status;
+    const minute = sofa.time?.played ? Math.floor(sofa.time.played / 60) : null;
+
+    return { ...match, scoreHome, scoreAway, status, sofaMinute: minute, sofaStatus: sofa.status?.description };
+  });
+}
+  
 // ─── FETCH MATCHES ────────────────────────────────────────────────────
 async function fetchMatches() {
   cleanExpiredNotifs();
@@ -545,7 +607,14 @@ async function fetchMatches() {
       if (a.datetime&&b.datetime) return new Date(a.datetime)-new Date(b.datetime);
       return 0;
     });
-    state.matches = all; state.lastUpdate = lnhData.scrapedAt; state.loading = false; renderMatches();
+    // Enrich with SofaScore live data
+    const sofaEvents = await fetchSofaScoreLive();
+    const enriched = enrichMatchesWithSofaScore(all, sofaEvents);
+
+    state.matches = enriched;
+    state.lastUpdate = lnhData.scrapedAt;
+    state.loading = false;
+    renderMatches();
   } catch (err) {
     console.error('Fetch error:', err); state.loading = false; renderMatches();
   } finally {
