@@ -598,8 +598,13 @@ async function fetchMatches() {
     const fixturesData = fixturesRes.ok ? await fixturesRes.json() : { matches: [] };
     const lnhMatches = lnhData.matches || [];
     const fixtureMatches = fixturesData.matches || [];
-    const lnhIds = new Set(lnhMatches.map(m => `${m.homeTeam}-${m.awayTeam}-${m.datetime?.substring(0,10)}`));
-    const newFixtures = fixtureMatches.filter(m => !lnhIds.has(`${m.homeTeam}-${m.awayTeam}-${m.datetime?.substring(0,10)}`));
+    const lnhIds = new Set(lnhMatches.map(m => 
+  `${m.homeTeam?.toLowerCase().split(' ')[0]}-${m.datetime?.substring(0,10)}`
+));
+const newFixtures = fixtureMatches.filter(m => {
+  const key = `${m.homeTeam?.toLowerCase().split(' ')[0]}-${m.datetime?.substring(0,10)}`;
+  return !lnhIds.has(key);
+});
     const order = { live:0, upcoming:1, finished:2 };
     const all = [...lnhMatches, ...newFixtures].sort((a,b) => {
       const sd = order[a.status]-order[b.status];
