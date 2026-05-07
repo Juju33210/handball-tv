@@ -136,7 +136,13 @@ export default async (req) => {
 
           const eventName = event.name.toLowerCase();
           const homeShort = home.split(' ')[0];
-          const awayShort = away.split(' ')[0];
+const awayShort = away.split(' ')[0];
+// Also check reverse — tvsports may use city name instead of club name
+const homeWords = home.split(' ');
+const awayWords = away.split(' ');
+const homeMatches = homeWords.some(w => w.length > 3 && eventName.includes(w));
+const awayMatches = awayWords.some(w => w.length > 3 && eventName.includes(w));
+if (homeMatches || awayMatches) {
 
           if (eventName.includes(homeShort) || eventName.includes(awayShort)) {
             const ch = {
