@@ -143,7 +143,6 @@ const awayWords = away.split(' ');
 const homeMatches = homeWords.some(w => w.length > 3 && eventName.includes(w));
 const awayMatches = awayWords.some(w => w.length > 3 && eventName.includes(w));
 if (homeMatches || awayMatches) {
-
           if (eventName.includes(homeShort) || eventName.includes(awayShort)) {
             const ch = {
               name: event.channel,
