@@ -8,10 +8,18 @@ export default async (req) => {
       `https://api.sofascore.com/api/v1/sport/handball/scheduled-events/${today}`,
       {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
-          'Accept': 'application/json',
-          'Referer': 'https://www.sofascore.com/',
-        }
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'application/json, text/plain, */*',
+  'Accept-Language': 'fr-FR,fr;q=0.9',
+  'Accept-Encoding': 'gzip, deflate, br',
+  'Origin': 'https://www.sofascore.com',
+  'Referer': 'https://www.sofascore.com/',
+  'Cache-Control': 'no-cache',
+  'Pragma': 'no-cache',
+  'sec-fetch-dest': 'empty',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-site': 'same-site',
+}
       }
     );
     const data = await res.json();
