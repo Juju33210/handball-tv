@@ -237,7 +237,11 @@ async function scrapeMatches() {
     }
   }
 
-  return matches;
+  // Enrich with live scores from Highlightly
+  const liveData = await fetchHighlightlyLive();
+  const enriched = enrichWithLiveScores(matches, liveData);
+
+  return enriched;
 }
 
 export default async (req) => {
