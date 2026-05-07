@@ -7,7 +7,7 @@ export default async (req) => {
     const today = new Date();
 
     // Fetch next 7 days
-    for (let i = 0; i <= 7; i++) {
+    for (let i = 0; i <= 14; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
