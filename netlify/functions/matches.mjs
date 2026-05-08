@@ -130,7 +130,7 @@ function parseMatchesFromHtml(html) {
     const round    = dashIdx > -1 ? compLine.substring(dashIdx + 3).trim() : '';
 
     const meta     = COMP_META[compName] || { short: compName, flag: "🏐" };
-    const datetime = parseDateTime(dateLine);
+    const datetime = parseDateTime(dateLine) || estimateDatetime(isLive, isFinish);
 
     const tvChannels = [];
     const tvImgRx = /src="([^"]*televisions[^"]+)"/gi;
