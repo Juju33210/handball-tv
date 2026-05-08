@@ -64,6 +64,11 @@
     .match-card.is-live::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--live-col)}
     .match-card.is-finished{opacity:0.7}
     .match-card.is-star{border-color:#ffc999}
+    .match-card.league-champions { border-color: #f59e0b; border-width: 2px; }
+    .match-card.league-european  { border-color: #7c3aed; border-width: 2px; }
+    .match-card.league-starligue { border-color: #1d4ed8; border-width: 2px; }
+    .match-card.league-proligue  { border-color: #1cb9d9; border-width: 2px; }
+    .match-card.league-coupe     { border-color: #059669; border-width: 2px; }
     .match-card.is-star::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
     .card-top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
     .comp-badge{display:flex;align-items:center;gap:5px;font-family:var(--font-cond);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-faint)}
@@ -397,7 +402,18 @@ function renderTVRow(match) {
 
 function renderCard(match) {
   const isActuallyLive = match.status==='live' && (match.scoreHome!==null||match.scoreAway!==null);
-  const classes = ['match-card',isActuallyLive?'is-live':'',match.status==='finished'?'is-finished':'',match.isStarMatch?'is-star':''].filter(Boolean).join(' ');
+  const leagueClass = {
+  'Liqui Moly StarLigue': 'league-starligue',
+  'ProLigue': 'league-proligue',
+  'Ligue des Champions': 'league-champions',
+  'Ligue des Champions - 1/4': 'league-champions',
+  'Ligue des Champions - 1/2': 'league-champions',
+  'European League': 'league-european',
+  'European League - 1/4': 'league-european',
+  'European League - 1/2': 'league-european',
+  'Coupe de France': 'league-coupe',
+  }[match.competition] || '';
+  const classes = ['match-card', leagueClass, isActuallyLive?'is-live':'', match.status==='finished'?'is-finished':'', match.isStarMatch?'is-star':''].filter(Boolean).join(' ');
   const liveBadge = isActuallyLive ? `<span class="live-badge">Direct</span>` : '';
   const starBadge = match.isStarMatch ? `<span class="star-badge">⭐ Star Match</span>` : '';
   return `<div class="${classes}" id="match-${match.id}">
