@@ -70,6 +70,9 @@ date.setHours(date.getHours() - tzOffset);
 return date.toISOString();
 }
 
+// Default kickoff times by day of week (France time)
+const DEFAULT_KICKOFF = { 0: 15, 1: 20, 2: 20, 3: 20, 4: 20, 5: 20, 6: 15 };
+
 function inferStatus(isoDatetime, isFinish, isLive) {
   if (isFinish) return "finished";
   if (!isoDatetime) {
@@ -81,6 +84,17 @@ function inferStatus(isoDatetime, isFinish, isLive) {
   if (diffMin < 0) return "upcoming";
   if (diffMin < 105) return "live";
   return "finished";
+}
+
+function estimateDatetime(isLive, isFinish) {
+  if (!isLive && !isFinish) return null;
+  const now = new Date();
+  const hour = DEFAULT_KICKOFF[now.getDay()] || 20;
+  const d = new Date(now);
+  d.setHours(hour, 0, 0, 0);
+  // If current time is before estimated kickoff, use yesterday
+  if (now < d) d.setDate(d.getDate() - 1);
+  return d.toISOString();
 }
 
 function stripTags(str) {
