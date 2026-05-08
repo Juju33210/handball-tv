@@ -369,7 +369,13 @@ function getGameTime(isoDatetime, sofaMinute, sofaStatus) {
 
 function renderCenter(match) {
   if ((match.status==='finished'||match.status==='live') && match.scoreHome !== null) {
-    const gameTime = match.status==='live' && match.datetime ? getGameTime(match.datetime, match.sofaMinute, match.sofaStatus) : null;
+    let gameTime = null;
+    if (match.status==='live' && match.datetime) {
+      const elapsed = Math.floor((Date.now() - new Date(match.datetime).getTime()) / 60000);
+      if (elapsed >= 0 && elapsed < 40) gameTime = `1MT ${elapsed}'`;
+      else if (elapsed >= 40 && elapsed < 55) gameTime = 'Mi-temps';
+      else if (elapsed >= 55 && elapsed < 95) gameTime = `2MT ${elapsed - 55}'`;
+    }
     const timeHtml = gameTime ? `<div class="match-date-label" style="color:var(--live-col)">${gameTime}</div>` : '';
     return `<div class="match-center"><div class="score-display"><span>${match.scoreHome}</span><span class="score-separator">–</span><span>${match.scoreAway}</span></div>${timeHtml}</div>`;
   }
