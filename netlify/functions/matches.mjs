@@ -62,11 +62,16 @@ function parseDateTime(dateTimeStr) {
   const hour  = parseInt(m[3]);
   const min   = parseInt(m[4]);
   const year  = new Date().getFullYear();
-  const date = new Date(year, month, day, hour, min);
-  const tzOffset = new Date().toLocaleString('fr-FR', {timeZone: 'Europe/Paris', timeZoneName: 'short'}).includes('UTC+2') ? 2 : 1;
-  date.setHours(date.getHours() - tzOffset);
-  return date.toISOString();
+  // Crée la date en heure française (UTC+1 hiver / UTC+2 été)
+const date = new Date(year, month, day, hour, min);
+// Offset France : détecté automatiquement via Intl
+const tzOffset = new Date().toLocaleString('fr-FR', {timeZone: 'Europe/Paris', timeZoneName: 'short'}).includes('UTC+2') ? 2 : 1;
+date.setHours(date.getHours() - tzOffset);
+return date.toISOString();
 }
+
+// Default kickoff times by day of week (France time)
+const DEFAULT_KICKOFF = { 0: 15, 1: 20, 2: 20, 3: 20, 4: 20, 5: 20, 6: 15 };
 
 function inferStatus(isoDatetime, isFinish, isLive) {
   if (isFinish) return "finished";
@@ -79,6 +84,17 @@ function inferStatus(isoDatetime, isFinish, isLive) {
   if (diffMin < 0) return "upcoming";
   if (diffMin < 105) return "live";
   return "finished";
+}
+
+function estimateDatetime(isLive, isFinish) {
+  if (!isLive && !isFinish) return null;
+  const now = new Date();
+  const hour = DEFAULT_KICKOFF[now.getDay()] || 20;
+  const d = new Date(now);
+  d.setHours(hour, 0, 0, 0);
+  // If current time is before estimated kickoff, use yesterday
+  if (now < d) d.setDate(d.getDate() - 1);
+  return d.toISOString();
 }
 
 function stripTags(str) {
@@ -114,20 +130,7 @@ function parseMatchesFromHtml(html) {
     const round    = dashIdx > -1 ? compLine.substring(dashIdx + 3).trim() : '';
 
     const meta     = COMP_META[compName] || { short: compName, flag: "🏐" };
-    let datetime   = parseDateTime(dateLine);
-
-    // If no datetime but match is live, estimate kickoff as 20h00 today
-    if (!datetime && isLive) {
-      const now = new Date();
-      const kickoff = new Date(now);
-      kickoff.setHours(20, 0, 0, 0);
-      // If current time is past midnight, use today; otherwise check if before 20h
-      if (now.getHours() < 20) kickoff.setDate(kickoff.getDate() - 1);
-      // Convert to UTC
-      const tzOffset = new Date().toLocaleString('fr-FR', {timeZone: 'Europe/Paris', timeZoneName: 'short'}).includes('UTC+2') ? 2 : 1;
-      kickoff.setHours(kickoff.getHours() - tzOffset);
-      datetime = kickoff.toISOString();
-    }
+    const datetime = parseDateTime(dateLine);
 
     const tvChannels = [];
     const tvImgRx = /src="([^"]*televisions[^"]+)"/gi;
@@ -202,9 +205,10 @@ function findTVChannel(match, tvEvents) {
   for (const event of tvEvents) {
     const eventTime = new Date(event.startDate).getTime();
     const diffMin = Math.abs(matchTime - eventTime) / 60000;
-    if (diffMin > 60) continue;
+    if (diffMin > 60) continue; // Must be within 60 min
 
     const eventName = event.name.toLowerCase();
+    // Check if both teams appear in event name
     const homeShort = home.split(' ')[0];
     const awayShort = away.split(' ')[0];
     if (eventName.includes(homeShort) || eventName.includes(awayShort)) {
@@ -247,6 +251,7 @@ async function scrapeMatches() {
     }
   }
 
+  // Enrich with live scores from Highlightly
   return matches;
 }
 
