@@ -584,18 +584,6 @@ const newFixtures = fixtureMatches.filter(m => {
       if (a.datetime&&b.datetime) return new Date(a.datetime)-new Date(b.datetime);
       return 0;
     });
-    // Fix missing datetimes using fixtures data
-const fixtureMap = {};
-fixtureMatches.forEach(m => {
-  const key = m.homeTeam?.toLowerCase().split(' ')[0];
-  if (key) fixtureMap[key] = m.datetime;
-});
-all.forEach(m => {
-  if (!m.datetime && m.homeTeam) {
-    const key = m.homeTeam.toLowerCase().split(' ')[0];
-    if (fixtureMap[key]) m.datetime = fixtureMap[key];
-  }
-});
     state.matches = all;
     state.lastUpdate = lnhData.scrapedAt;
     state.loading = false;
@@ -628,3 +616,4 @@ setTimeout(() => { if (Notification?.permission==='default') document.getElement
 </script>
 </body>
 </html>
+    
