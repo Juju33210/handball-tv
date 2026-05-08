@@ -87,6 +87,7 @@
     .is-finished .score-display{color:var(--text-dim)}
     .match-time{font-family:var(--font-cond);font-size:1.4rem;font-weight:800;color:var(--upcoming);letter-spacing:0.01em}
     .match-date-label{font-size:0.67rem;color:var(--text-faint);font-family:var(--font-cond);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:1px}
+    .game-time-label { font-size: 0.82rem; font-family: var(--font-cond); font-weight: 800; color: var(--live-col); margin-top: 2px; letter-spacing: 0.03em; }
     .tv-channel{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
     .tv-channels-group{display:flex;gap:5px;align-items:center}
     .tv-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-family:var(--font-cond);font-size:0.7rem;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;border:1.5px solid}
@@ -376,7 +377,7 @@ function renderCenter(match) {
       else if (elapsed >= 40 && elapsed < 55) gameTime = 'Mi-temps';
       else if (elapsed >= 55 && elapsed < 95) gameTime = `2MT ${elapsed - 55}'`;
     }
-    const timeHtml = gameTime ? `<div class="match-date-label" style="color:var(--live-col)">${gameTime}</div>` : '';
+    const timeHtml = gameTime ? `<div class="game-time-label">${gameTime}</div>` : '';
     return `<div class="match-center"><div class="score-display"><span>${match.scoreHome}</span><span class="score-separator">–</span><span>${match.scoreAway}</span></div>${timeHtml}</div>`;
   }
   const time = formatTime(match.datetime);
