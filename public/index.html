@@ -402,17 +402,13 @@ function renderTVRow(match) {
 
 function renderCard(match) {
   const isActuallyLive = match.status==='live' && (match.scoreHome!==null||match.scoreAway!==null);
-  const leagueClass = {
-  'Liqui Moly StarLigue': 'league-starligue',
-  'ProLigue': 'league-proligue',
-  'Ligue des Champions': 'league-champions',
-  'Ligue des Champions - 1/4': 'league-champions',
-  'Ligue des Champions - 1/2': 'league-champions',
-  'European League': 'league-european',
-  'European League - 1/4': 'league-european',
-  'European League - 1/2': 'league-european',
-  'Coupe de France': 'league-coupe',
-  }[match.competition] || '';
+  const comp = match.competition || '';
+const leagueClass = 
+  comp.includes('StarLigue') || comp.includes('Starligue') ? 'league-starligue' :
+  comp.includes('ProLigue') || comp.includes('Proligue') ? 'league-proligue' :
+  comp.includes('Champions') ? 'league-champions' :
+  comp.includes('European') ? 'league-european' :
+  comp.includes('Coupe de France') ? 'league-coupe' : '';
   const classes = ['match-card', leagueClass, isActuallyLive?'is-live':'', match.status==='finished'?'is-finished':'', match.isStarMatch?'is-star':''].filter(Boolean).join(' ');
   const liveBadge = isActuallyLive ? `<span class="live-badge">Direct</span>` : '';
   const starBadge = match.isStarMatch ? `<span class="star-badge">⭐ Star Match</span>` : '';
